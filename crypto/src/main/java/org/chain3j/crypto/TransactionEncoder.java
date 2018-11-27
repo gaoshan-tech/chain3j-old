@@ -1,5 +1,6 @@
 package org.chain3j.crypto;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,8 @@ public class TransactionEncoder {
         List<RlpType> result = new ArrayList<>();
 
         result.add(RlpString.create(rawTransaction.getNonce()));
+//        transaction.systemContract = '0x0';//System contract flag, always = 0
+        result.add(RlpString.create(BigInteger.ZERO));
         result.add(RlpString.create(rawTransaction.getGasPrice()));
         result.add(RlpString.create(rawTransaction.getGasLimit()));
 
@@ -81,6 +84,15 @@ public class TransactionEncoder {
         // value field will already be hex encoded, so we need to convert into binary first
         byte[] data = Numeric.hexStringToByteArray(rawTransaction.getData());
         result.add(RlpString.create(data));
+        //transaction.shardingFlag = utils.numberToHex(tx.shardingFlag);
+        result.add(RlpString.create(rawTransaction.getShardingFlag()));
+        // transaction.via.toLowerCase(),
+        String via = rawTransaction.getVia();
+        if (via != null && via.length() > 0) {
+            result.add(RlpString.create(Numeric.hexStringToByteArray(via)));
+        } else {
+            result.add(RlpString.create(""));
+        }
 
         if (signatureData != null) {
             result.add(RlpString.create(signatureData.getV()));

@@ -48,10 +48,18 @@ public abstract class ManagedTransaction {
     }
 
     protected TransactionReceipt send(
+            String to, String data, BigInteger value, BigInteger gasPrice, BigInteger gasLimit, BigInteger shardingFlag, String via)
+            throws IOException, TransactionException {
+
+        return transactionManager.executeTransaction(
+                gasPrice, gasLimit, to, data, value, shardingFlag, via);
+    }
+
+    protected TransactionReceipt send(
             String to, String data, BigInteger value, BigInteger gasPrice, BigInteger gasLimit)
             throws IOException, TransactionException {
 
         return transactionManager.executeTransaction(
-                gasPrice, gasLimit, to, data, value);
+                gasPrice, gasLimit, to, data, value, BigInteger.ZERO, null);
     }
 }

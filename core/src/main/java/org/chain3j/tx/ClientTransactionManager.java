@@ -39,11 +39,11 @@ public class ClientTransactionManager extends TransactionManager {
     @Override
     public McSendTransaction sendTransaction(
             BigInteger gasPrice, BigInteger gasLimit, String to,
-            String data, BigInteger value)
+            String data, BigInteger value, BigInteger shardingFlag, String via)
             throws IOException {
 
         Transaction transaction = new Transaction(
-                getFromAddress(), null, gasPrice, gasLimit, to, value, data);
+                getFromAddress(), null, gasPrice, gasLimit, to, value, data, shardingFlag, via);
 
         return chain3j.mcSendTransaction(transaction)
                 .send();

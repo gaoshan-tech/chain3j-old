@@ -20,8 +20,10 @@ public class TransactionDecoderTest {
         BigInteger gasLimit = BigInteger.TEN;
         String to = "0x0add5355";
         BigInteger value = BigInteger.valueOf(Long.MAX_VALUE);
+        BigInteger shardingFlag = BigInteger.ZERO;
+        String via = "0x";
         RawTransaction rawTransaction = RawTransaction.createMcTransaction(
-                nonce, gasPrice, gasLimit, to, value);
+                nonce, gasPrice, gasLimit, to, value, shardingFlag, via);
         byte[] encodedMessage = TransactionEncoder.encode(rawTransaction);
         String hexMessage = Numeric.toHexString(encodedMessage);
 
@@ -41,9 +43,11 @@ public class TransactionDecoderTest {
         BigInteger gasPrice = BigInteger.ONE;
         BigInteger gasLimit = BigInteger.TEN;
         String to = "0x0add5355";
+        BigInteger shardingFlag = BigInteger.ZERO;
+        String via = "0x";
         BigInteger value = BigInteger.valueOf(Long.MAX_VALUE);
         RawTransaction rawTransaction = RawTransaction.createMcTransaction(
-                nonce, gasPrice, gasLimit, to, value);
+                nonce, gasPrice, gasLimit, to, value, shardingFlag, via);
         byte[] signedMessage = TransactionEncoder.signMessage(
                 rawTransaction, SampleKeys.CREDENTIALS);
         String hexMessage = Numeric.toHexString(signedMessage);
@@ -76,8 +80,10 @@ public class TransactionDecoderTest {
         String to = "0x0add5355";
         BigInteger value = BigInteger.valueOf(Long.MAX_VALUE);
         Integer chainId = 1;
+        BigInteger shardingFlag = BigInteger.ZERO;
+        String via = "0x";
         RawTransaction rawTransaction = RawTransaction.createMcTransaction(
-                nonce, gasPrice, gasLimit, to, value);
+                nonce, gasPrice, gasLimit, to, value, shardingFlag, via);
         byte[] signedMessage = TransactionEncoder.signMessage(
                 rawTransaction, chainId.byteValue(), SampleKeys.CREDENTIALS);
         String hexMessage = Numeric.toHexString(signedMessage);

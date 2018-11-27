@@ -88,7 +88,7 @@ public class RawTransactionManager extends TransactionManager {
     @Override
     public McSendTransaction sendTransaction(
             BigInteger gasPrice, BigInteger gasLimit, String to,
-            String data, BigInteger value) throws IOException {
+            String data, BigInteger value, BigInteger shardingFlag, String via) throws IOException {
 
         BigInteger nonce = getNonce();
 
@@ -98,7 +98,9 @@ public class RawTransactionManager extends TransactionManager {
                 gasLimit,
                 to,
                 value,
-                data);
+                data,
+                shardingFlag,
+                via);
 
         return signAndSend(rawTransaction);
     }

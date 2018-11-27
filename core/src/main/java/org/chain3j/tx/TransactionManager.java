@@ -43,17 +43,17 @@ public abstract class TransactionManager {
 
     protected TransactionReceipt executeTransaction(
             BigInteger gasPrice, BigInteger gasLimit, String to,
-            String data, BigInteger value)
+            String data, BigInteger value, BigInteger shardingFlag, String via)
             throws IOException, TransactionException {
 
         McSendTransaction ethSendTransaction = sendTransaction(
-                gasPrice, gasLimit, to, data, value);
+                gasPrice, gasLimit, to, data, value, shardingFlag, via);
         return processResponse(ethSendTransaction);
     }
 
     public abstract McSendTransaction sendTransaction(
             BigInteger gasPrice, BigInteger gasLimit, String to,
-            String data, BigInteger value)
+            String data, BigInteger value, BigInteger shardingFlag, String via)
             throws IOException;
 
     public String getFromAddress() {

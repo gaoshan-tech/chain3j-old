@@ -14,14 +14,18 @@ public class RawTransaction {
     private String to;
     private BigInteger value;
     private String data;
+    private BigInteger shardingFlag;
+    private String via;
 
     protected RawTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to,
-                           BigInteger value, String data) {
+                           BigInteger value, String data, BigInteger shardingFlag, String via) {
         this.nonce = nonce;
         this.gasPrice = gasPrice;
         this.gasLimit = gasLimit;
         this.to = to;
         this.value = value;
+        this.shardingFlag = shardingFlag;
+        this.via = via;
 
         if (data != null) {
             this.data = Numeric.cleanHexPrefix(data);
@@ -30,29 +34,29 @@ public class RawTransaction {
 
     public static RawTransaction createContractTransaction(
             BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value,
-            String init) {
+            String init, BigInteger shardingFlag, String via) {
 
-        return new RawTransaction(nonce, gasPrice, gasLimit, "", value, init);
+        return new RawTransaction(nonce, gasPrice, gasLimit, "", value, init, shardingFlag, via);
     }
 
     public static RawTransaction createMcTransaction(
             BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to,
-            BigInteger value) {
+            BigInteger value, BigInteger shardingFlag, String via) {
 
-        return new RawTransaction(nonce, gasPrice, gasLimit, to, value, "");
+        return new RawTransaction(nonce, gasPrice, gasLimit, to, value, "", shardingFlag, via);
 
     }
 
     public static RawTransaction createTransaction(
-            BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, String data) {
-        return createTransaction(nonce, gasPrice, gasLimit, to, BigInteger.ZERO, data);
+            BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, String data, BigInteger shardingFlag, String via) {
+        return createTransaction(nonce, gasPrice, gasLimit, to, BigInteger.ZERO, data, shardingFlag, via);
     }
 
     public static RawTransaction createTransaction(
             BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to,
-            BigInteger value, String data) {
+            BigInteger value, String data, BigInteger shardingFlag, String via) {
 
-        return new RawTransaction(nonce, gasPrice, gasLimit, to, value, data);
+        return new RawTransaction(nonce, gasPrice, gasLimit, to, value, data, shardingFlag, via);
     }
 
     public BigInteger getNonce() {
@@ -77,5 +81,21 @@ public class RawTransaction {
 
     public String getData() {
         return data;
+    }
+
+    public BigInteger getShardingFlag() {
+        return shardingFlag;
+    }
+
+    public void setShardingFlag(BigInteger shardingFlag) {
+        this.shardingFlag = shardingFlag;
+    }
+
+    public String getVia() {
+        return via;
+    }
+
+    public void setVia(String via) {
+        this.via = via;
     }
 }
