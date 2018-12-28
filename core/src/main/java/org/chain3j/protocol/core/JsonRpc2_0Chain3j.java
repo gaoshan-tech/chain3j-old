@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.chain3j.protocol.core.methods.response.*;
 import rx.Observable;
 
 import org.chain3j.protocol.Chain3j;
@@ -16,58 +17,6 @@ import org.chain3j.protocol.Chain3jService;
 import org.chain3j.protocol.core.methods.request.ShhFilter;
 import org.chain3j.protocol.core.methods.request.ShhPost;
 import org.chain3j.protocol.core.methods.request.Transaction;
-import org.chain3j.protocol.core.methods.response.DbGetHex;
-import org.chain3j.protocol.core.methods.response.DbGetString;
-import org.chain3j.protocol.core.methods.response.DbPutHex;
-import org.chain3j.protocol.core.methods.response.DbPutString;
-import org.chain3j.protocol.core.methods.response.McAccounts;
-import org.chain3j.protocol.core.methods.response.McBlock;
-import org.chain3j.protocol.core.methods.response.McBlockNumber;
-import org.chain3j.protocol.core.methods.response.McCall;
-import org.chain3j.protocol.core.methods.response.McCoinbase;
-import org.chain3j.protocol.core.methods.response.McCompileLLL;
-import org.chain3j.protocol.core.methods.response.McCompileSerpent;
-import org.chain3j.protocol.core.methods.response.McCompileSolidity;
-import org.chain3j.protocol.core.methods.response.McEstimateGas;
-import org.chain3j.protocol.core.methods.response.McFilter;
-import org.chain3j.protocol.core.methods.response.McGasPrice;
-import org.chain3j.protocol.core.methods.response.McGetBalance;
-import org.chain3j.protocol.core.methods.response.McGetBlockTransactionCountByHash;
-import org.chain3j.protocol.core.methods.response.McGetBlockTransactionCountByNumber;
-import org.chain3j.protocol.core.methods.response.McGetCode;
-import org.chain3j.protocol.core.methods.response.McGetCompilers;
-import org.chain3j.protocol.core.methods.response.McGetStorageAt;
-import org.chain3j.protocol.core.methods.response.McGetTransactionCount;
-import org.chain3j.protocol.core.methods.response.McGetTransactionReceipt;
-import org.chain3j.protocol.core.methods.response.McGetUncleCountByBlockHash;
-import org.chain3j.protocol.core.methods.response.McGetUncleCountByBlockNumber;
-import org.chain3j.protocol.core.methods.response.McGetWork;
-import org.chain3j.protocol.core.methods.response.McHashrate;
-import org.chain3j.protocol.core.methods.response.McLog;
-import org.chain3j.protocol.core.methods.response.McMining;
-import org.chain3j.protocol.core.methods.response.McProtocolVersion;
-import org.chain3j.protocol.core.methods.response.McSendTransaction;
-import org.chain3j.protocol.core.methods.response.McSign;
-import org.chain3j.protocol.core.methods.response.McSubmitHashrate;
-import org.chain3j.protocol.core.methods.response.McSubmitWork;
-import org.chain3j.protocol.core.methods.response.McSubscribe;
-import org.chain3j.protocol.core.methods.response.McSyncing;
-import org.chain3j.protocol.core.methods.response.McTransaction;
-import org.chain3j.protocol.core.methods.response.McUninstallFilter;
-import org.chain3j.protocol.core.methods.response.Log;
-import org.chain3j.protocol.core.methods.response.NetListening;
-import org.chain3j.protocol.core.methods.response.NetPeerCount;
-import org.chain3j.protocol.core.methods.response.NetVersion;
-import org.chain3j.protocol.core.methods.response.ShhAddToGroup;
-import org.chain3j.protocol.core.methods.response.ShhHasIdentity;
-import org.chain3j.protocol.core.methods.response.ShhMessages;
-import org.chain3j.protocol.core.methods.response.ShhNewFilter;
-import org.chain3j.protocol.core.methods.response.ShhNewGroup;
-import org.chain3j.protocol.core.methods.response.ShhNewIdentity;
-import org.chain3j.protocol.core.methods.response.ShhUninstallFilter;
-import org.chain3j.protocol.core.methods.response.ShhVersion;
-import org.chain3j.protocol.core.methods.response.Chain3ClientVersion;
-import org.chain3j.protocol.core.methods.response.Chain3Sha3;
 import org.chain3j.protocol.rx.JsonRpc2_0Rx;
 import org.chain3j.protocol.websocket.events.LogNotification;
 import org.chain3j.protocol.websocket.events.NewHeadsNotification;
@@ -693,6 +642,100 @@ public class JsonRpc2_0Chain3j implements Chain3j {
                 Arrays.asList(Numeric.toHexStringWithPrefixSafe(filterId)),
                 chain3jService,
                 ShhMessages.class);
+    }
+
+    @Override
+    public Request<?, McBlock> scsGetBlockByNumber(String address, DefaultBlockParameter defaultBlockParameter) {
+        return new Request<>(
+                "scs_getBlock",
+                Arrays.asList(
+                        defaultBlockParameter.getValue()),
+                chain3jService,
+                McBlock.class);
+    }
+
+    @Override
+    public Request<?, McCall> scsDirectCall(Transaction transaction) {
+        return new Request<>(
+                "scs_directCall",
+                Arrays.asList(transaction),
+                chain3jService,
+                McCall.class);
+    }
+
+    @Override
+    public Request<?, ScsBlockList> scsGetBlockList(String address, DefaultBlockParameter startBlockParameter, DefaultBlockParameter endBlockParameter) {
+        return new Request<>(
+                "scs_getBlockList",
+                Arrays.asList(
+                        address,
+                        startBlockParameter.getValue(),
+                        endBlockParameter.getValue()),
+                chain3jService,
+                ScsBlockList.class);
+    }
+
+    @Override
+    public Request<?, McBlockNumber> scsGetBlockNumber(String address) {
+        return new Request<>(
+                "scs_getBlockNumber",
+                Arrays.asList(address),
+                chain3jService,
+                McBlockNumber.class);
+    }
+
+    @Override
+    public Request<?, ScsDappState> scsGetDappState(String address) {
+        return new Request<>(
+                "scs_getDappState",
+                Collections.<String>emptyList(),
+                chain3jService,
+                ScsDappState.class);
+    }
+
+    @Override
+    public Request<?, ScsMicroChainList> scsGetMicroChainList() {
+        return new Request<>(
+                "scs_getMicroChainList",
+                Collections.<String>emptyList(),
+                chain3jService,
+                ScsMicroChainList.class);
+    }
+
+    @Override
+    public Request<?, ScsMicroChainInfo> scsGetMicroChainInfo() {
+        return new Request<>(
+                "scs_getMicroChainInfo",
+                Collections.<String>emptyList(),
+                chain3jService,
+                ScsMicroChainInfo.class);
+    }
+
+    @Override
+    public Request<?, ScsNonce> scsGetNonce(String address, String accountAddress) {
+        return new Request<>(
+                "scs_getNonce",
+                Arrays.asList(address, accountAddress),
+                chain3jService,
+                ScsNonce.class);
+    }
+
+    @Override
+    public Request<?, ScsId> scsGetSCSId() {
+        return new Request<>(
+                "scs_getSCSId",
+                Collections.<String>emptyList(),
+                chain3jService,
+                ScsId.class);
+    }
+
+    @Override
+    public Request<?, McGetTransactionReceipt> scsGetTransactionReceipt(String address, String transactionHash) {
+        return new Request<>(
+                "scs_getTransactionReceipt",
+                Arrays.asList(address, transactionHash),
+                chain3jService,
+                McGetTransactionReceipt.class);
     }
 
     @Override

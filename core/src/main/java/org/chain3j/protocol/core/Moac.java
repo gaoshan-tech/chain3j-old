@@ -2,57 +2,9 @@ package org.chain3j.protocol.core;
 
 import java.math.BigInteger;
 
+import org.chain3j.abi.datatypes.Address;
 import org.chain3j.protocol.core.methods.request.ShhFilter;
-import org.chain3j.protocol.core.methods.response.DbGetHex;
-import org.chain3j.protocol.core.methods.response.DbGetString;
-import org.chain3j.protocol.core.methods.response.DbPutHex;
-import org.chain3j.protocol.core.methods.response.DbPutString;
-import org.chain3j.protocol.core.methods.response.McAccounts;
-import org.chain3j.protocol.core.methods.response.McBlock;
-import org.chain3j.protocol.core.methods.response.McBlockNumber;
-import org.chain3j.protocol.core.methods.response.McCall;
-import org.chain3j.protocol.core.methods.response.McCoinbase;
-import org.chain3j.protocol.core.methods.response.McCompileLLL;
-import org.chain3j.protocol.core.methods.response.McCompileSerpent;
-import org.chain3j.protocol.core.methods.response.McCompileSolidity;
-import org.chain3j.protocol.core.methods.response.McEstimateGas;
-import org.chain3j.protocol.core.methods.response.McFilter;
-import org.chain3j.protocol.core.methods.response.McGasPrice;
-import org.chain3j.protocol.core.methods.response.McGetBalance;
-import org.chain3j.protocol.core.methods.response.McGetBlockTransactionCountByHash;
-import org.chain3j.protocol.core.methods.response.McGetBlockTransactionCountByNumber;
-import org.chain3j.protocol.core.methods.response.McGetCode;
-import org.chain3j.protocol.core.methods.response.McGetCompilers;
-import org.chain3j.protocol.core.methods.response.McGetStorageAt;
-import org.chain3j.protocol.core.methods.response.McGetTransactionCount;
-import org.chain3j.protocol.core.methods.response.McGetTransactionReceipt;
-import org.chain3j.protocol.core.methods.response.McGetUncleCountByBlockHash;
-import org.chain3j.protocol.core.methods.response.McGetUncleCountByBlockNumber;
-import org.chain3j.protocol.core.methods.response.McGetWork;
-import org.chain3j.protocol.core.methods.response.McHashrate;
-import org.chain3j.protocol.core.methods.response.McLog;
-import org.chain3j.protocol.core.methods.response.McMining;
-import org.chain3j.protocol.core.methods.response.McProtocolVersion;
-import org.chain3j.protocol.core.methods.response.McSendTransaction;
-import org.chain3j.protocol.core.methods.response.McSign;
-import org.chain3j.protocol.core.methods.response.McSubmitHashrate;
-import org.chain3j.protocol.core.methods.response.McSubmitWork;
-import org.chain3j.protocol.core.methods.response.McSyncing;
-import org.chain3j.protocol.core.methods.response.McTransaction;
-import org.chain3j.protocol.core.methods.response.McUninstallFilter;
-import org.chain3j.protocol.core.methods.response.NetListening;
-import org.chain3j.protocol.core.methods.response.NetPeerCount;
-import org.chain3j.protocol.core.methods.response.NetVersion;
-import org.chain3j.protocol.core.methods.response.ShhAddToGroup;
-import org.chain3j.protocol.core.methods.response.ShhHasIdentity;
-import org.chain3j.protocol.core.methods.response.ShhMessages;
-import org.chain3j.protocol.core.methods.response.ShhNewFilter;
-import org.chain3j.protocol.core.methods.response.ShhNewGroup;
-import org.chain3j.protocol.core.methods.response.ShhNewIdentity;
-import org.chain3j.protocol.core.methods.response.ShhUninstallFilter;
-import org.chain3j.protocol.core.methods.response.ShhVersion;
-import org.chain3j.protocol.core.methods.response.Chain3ClientVersion;
-import org.chain3j.protocol.core.methods.response.Chain3Sha3;
+import org.chain3j.protocol.core.methods.response.*;
 
 /**
  * Core moac JSON-RPC API.
@@ -200,4 +152,24 @@ public interface Moac {
     Request<?, ShhMessages> shhGetFilterChanges(BigInteger filterId);
 
     Request<?, ShhMessages> shhGetMessages(BigInteger filterId);
+
+    Request<?, McBlock> scsGetBlockByNumber(String address, DefaultBlockParameter defaultBlockParameter);
+
+    Request<?, McCall> scsDirectCall(org.chain3j.protocol.core.methods.request.Transaction transaction);
+
+    Request<?, ScsBlockList> scsGetBlockList(String address, DefaultBlockParameter startBlockParameter, DefaultBlockParameter endBlockParameter);
+
+    Request<?, McBlockNumber> scsGetBlockNumber(String address);
+
+    Request<?, ScsDappState> scsGetDappState(String address);
+
+    Request<?, ScsMicroChainList> scsGetMicroChainList();
+
+    Request<?, ScsMicroChainInfo> scsGetMicroChainInfo();
+
+    Request<?, ScsNonce> scsGetNonce(String address, String accountAddress);
+
+    Request<?, ScsId> scsGetSCSId();
+
+    Request<?, McGetTransactionReceipt> scsGetTransactionReceipt(String address, String transactionHash);
 }

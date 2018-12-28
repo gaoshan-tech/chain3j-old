@@ -322,7 +322,7 @@ public class ContractTest extends ManagedTransactionTester {
     public void testStaticGasProvider() throws IOException, TransactionException {
         StaticGasProvider gasProvider = new StaticGasProvider(BigInteger.TEN, BigInteger.ONE);
         TransactionManager txManager = mock(TransactionManager.class);
-        when(txManager.executeTransaction(any(), any(), any(), any(), any()))
+        when(txManager.executeTransaction(any(), any(), any(), any(), any(),BigInteger.ZERO, null))
                 .thenReturn(new TransactionReceipt());
 
         contract = new TestContract(ADDRESS, chain3j, txManager, gasProvider);
@@ -332,7 +332,7 @@ public class ContractTest extends ManagedTransactionTester {
         contract.executeTransaction(func);
 
         verify(txManager).executeTransaction(eq(BigInteger.TEN),
-                eq(BigInteger.ONE), any(), any(), any());
+                eq(BigInteger.ONE), any(), any(), any(),BigInteger.ZERO, null);
     }
 
     @Test(expected = RuntimeException.class)
