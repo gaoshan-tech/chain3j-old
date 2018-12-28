@@ -1,22 +1,6 @@
 package org.chain3j.tx;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.chain3j.abi.EventEncoder;
-import org.chain3j.abi.EventValues;
-import org.chain3j.abi.FunctionEncoder;
-import org.chain3j.abi.FunctionReturnDecoder;
-import org.chain3j.abi.TypeReference;
+import org.chain3j.abi.*;
 import org.chain3j.abi.datatypes.Address;
 import org.chain3j.abi.datatypes.Event;
 import org.chain3j.abi.datatypes.Function;
@@ -27,9 +11,9 @@ import org.chain3j.protocol.core.DefaultBlockParameter;
 import org.chain3j.protocol.core.DefaultBlockParameterName;
 import org.chain3j.protocol.core.RemoteCall;
 import org.chain3j.protocol.core.methods.request.Transaction;
+import org.chain3j.protocol.core.methods.response.Log;
 import org.chain3j.protocol.core.methods.response.McCall;
 import org.chain3j.protocol.core.methods.response.McGetCode;
-import org.chain3j.protocol.core.methods.response.Log;
 import org.chain3j.protocol.core.methods.response.TransactionReceipt;
 import org.chain3j.protocol.exceptions.TransactionException;
 import org.chain3j.tx.exceptions.ContractCallException;
@@ -37,12 +21,18 @@ import org.chain3j.tx.gas.ContractGasProvider;
 import org.chain3j.tx.gas.StaticGasProvider;
 import org.chain3j.utils.Numeric;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 /**
  * Solidity contract type abstraction for interacting with smart contracts via native Java types.
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class Contract extends ManagedTransaction {
+public abstract class SubChainContract extends ManagedTransaction {
 
     //https://www.reddit.com/r/moac/comments/5g8ia6/attention_miners_we_recommend_raising_gas_limit/
     /**
@@ -55,54 +45,56 @@ public abstract class Contract extends ManagedTransaction {
 
     protected final String contractBinary;
     protected String contractAddress;
+    protected String via;
     protected ContractGasProvider gasProvider;
     protected TransactionReceipt transactionReceipt;
     protected Map<String, String> deployedAddresses;
     protected DefaultBlockParameter defaultBlockParameter = DefaultBlockParameterName.LATEST;
 
-    protected Contract(String contractBinary, String contractAddress,
-                       Chain3j chain3j, TransactionManager transactionManager,
-                       ContractGasProvider gasProvider) {
+    protected SubChainContract(String contractBinary, String contractAddress, String via,
+                               Chain3j chain3j, TransactionManager transactionManager,
+                               ContractGasProvider gasProvider) {
         super(chain3j, transactionManager);
 
         this.contractAddress = ensResolver.resolve(contractAddress);
 
         this.contractBinary = contractBinary;
         this.gasProvider = gasProvider;
+        this.via = via;
     }
 
-    protected Contract(String contractBinary, String contractAddress, Chain3j chain3j, Credentials credentials, ContractGasProvider gasProvider) {
-        this(contractBinary, (String)contractAddress, chain3j, (TransactionManager)(new RawTransactionManager(chain3j, credentials)), (ContractGasProvider)gasProvider);
+    protected SubChainContract(String contractBinary, String contractAddress, String via, Chain3j chain3j, Credentials credentials, ContractGasProvider gasProvider) {
+        this(contractBinary, (String)contractAddress, via, chain3j, (TransactionManager)(new RawTransactionManager(chain3j, credentials)), (ContractGasProvider)gasProvider);
     }
 
     @Deprecated
-    protected Contract(String contractBinary, String contractAddress,
-                       Chain3j chain3j, TransactionManager transactionManager,
-                       BigInteger gasPrice, BigInteger gasLimit) {
-        this(contractBinary, contractAddress, chain3j, transactionManager,
+    protected SubChainContract(String contractBinary, String contractAddress, String via,
+                               Chain3j chain3j, TransactionManager transactionManager,
+                               BigInteger gasPrice, BigInteger gasLimit) {
+        this(contractBinary, contractAddress, via, chain3j, transactionManager,
                 new StaticGasProvider(gasPrice, gasLimit));
     }
 
     @Deprecated
-    protected Contract(String contractBinary, String contractAddress,
-                       Chain3j chain3j, Credentials credentials,
-                       BigInteger gasPrice, BigInteger gasLimit) {
+    protected SubChainContract(String contractBinary, String contractAddress, String via,
+                               Chain3j chain3j, Credentials credentials,
+                               BigInteger gasPrice, BigInteger gasLimit) {
         this(contractBinary, contractAddress, chain3j, new RawTransactionManager(chain3j, credentials),
                 gasPrice, gasLimit);
     }
 
     @Deprecated
-    protected Contract(String contractAddress,
-                       Chain3j chain3j, TransactionManager transactionManager,
-                       BigInteger gasPrice, BigInteger gasLimit) {
-        this("", contractAddress, chain3j, transactionManager, gasPrice, gasLimit);
+    protected SubChainContract(String contractAddress, String via,
+                               Chain3j chain3j, TransactionManager transactionManager,
+                               BigInteger gasPrice, BigInteger gasLimit) {
+        this("", contractAddress, via, chain3j, transactionManager, gasPrice, gasLimit);
     }
 
     @Deprecated
-    protected Contract(String contractAddress,
-                       Chain3j chain3j, Credentials credentials,
-                       BigInteger gasPrice, BigInteger gasLimit) {
-        this("", contractAddress, chain3j, new RawTransactionManager(chain3j, credentials),
+    protected SubChainContract(String contractAddress, String via,
+                               Chain3j chain3j, Credentials credentials,
+                               BigInteger gasPrice, BigInteger gasLimit) {
+        this("", contractAddress, via, chain3j, new RawTransactionManager(chain3j, credentials),
                 gasPrice, gasLimit);
     }
 
@@ -170,10 +162,9 @@ public abstract class Contract extends ManagedTransaction {
     private List<Type> executeCall(
             Function function) throws IOException {
         String encodedFunction = FunctionEncoder.encode(function);
-        McCall mcCall = chain3j.mcCall(
+        McCall mcCall = chain3j.scsDirectCall(
                 Transaction.createMcCallTransaction(
-                        transactionManager.getFromAddress(), contractAddress, encodedFunction),
-                defaultBlockParameter)
+                        transactionManager.getFromAddress(), contractAddress, encodedFunction))
                 .send();
 
         String value = mcCall.getValue();
@@ -234,7 +225,7 @@ public abstract class Contract extends ManagedTransaction {
 
         TransactionReceipt receipt = send(contractAddress, data, weiValue,
                 gasProvider.getGasPrice(funcName),
-                gasProvider.getGasLimit(funcName));
+                gasProvider.getGasLimit(funcName), BigInteger.ONE, via);
 
         if (!receipt.isStatusOK()) {
             throw new TransactionException(
@@ -270,7 +261,7 @@ public abstract class Contract extends ManagedTransaction {
         return new RemoteCall<>(() -> executeTransaction(function, weiValue));
     }
 
-    private static <T extends Contract> T create(
+    private static <T extends SubChainContract> T create(
             T contract, String binary, String encodedConstructor, BigInteger value)
             throws IOException, TransactionException {
         TransactionReceipt transactionReceipt =
@@ -286,7 +277,7 @@ public abstract class Contract extends ManagedTransaction {
         return contract;
     }
 
-    protected static <T extends Contract> T deploy(
+    protected static <T extends SubChainContract> T deploy(
             Class<T> type,
             Chain3j chain3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -311,7 +302,7 @@ public abstract class Contract extends ManagedTransaction {
         }
     }
 
-    protected static <T extends Contract> T deploy(
+    protected static <T extends SubChainContract> T deploy(
             Class<T> type,
             Chain3j chain3j, TransactionManager transactionManager,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -336,7 +327,7 @@ public abstract class Contract extends ManagedTransaction {
         }
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(
             Class<T> type,
             Chain3j chain3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -346,7 +337,7 @@ public abstract class Contract extends ManagedTransaction {
                 encodedConstructor, value));
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(
             Class<T> type,
             Chain3j chain3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -356,7 +347,7 @@ public abstract class Contract extends ManagedTransaction {
                 binary, encodedConstructor, BigInteger.ZERO);
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(
             Class<T> type,
             Chain3j chain3j, TransactionManager transactionManager,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -366,7 +357,7 @@ public abstract class Contract extends ManagedTransaction {
                 encodedConstructor, value));
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(
             Class<T> type,
             Chain3j chain3j, TransactionManager transactionManager,
             BigInteger gasPrice, BigInteger gasLimit,
@@ -376,7 +367,7 @@ public abstract class Contract extends ManagedTransaction {
                 encodedConstructor, BigInteger.ZERO);
     }
 
-    protected static <T extends Contract> T deploy(Class<T> type, Chain3j chain3j, Credentials credentials, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) throws RuntimeException, TransactionException {
+    protected static <T extends SubChainContract> T deploy(Class<T> type, Chain3j chain3j, Credentials credentials, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) throws RuntimeException, TransactionException {
         try {
             Constructor<T> constructor = type.getDeclaredConstructor(String.class, Chain3j.class, Credentials.class, ContractGasProvider.class);
             constructor.setAccessible(true);
@@ -389,7 +380,7 @@ public abstract class Contract extends ManagedTransaction {
         }
     }
 
-    protected static <T extends Contract> T deploy(Class<T> type, Chain3j chain3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) throws RuntimeException, TransactionException {
+    protected static <T extends SubChainContract> T deploy(Class<T> type, Chain3j chain3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) throws RuntimeException, TransactionException {
         try {
             Constructor<T> constructor = type.getDeclaredConstructor(String.class, Chain3j.class, TransactionManager.class, ContractGasProvider.class);
             constructor.setAccessible(true);
@@ -402,13 +393,13 @@ public abstract class Contract extends ManagedTransaction {
         }
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(Class<T> type, Chain3j chain3j, Credentials credentials, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) {
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(Class<T> type, Chain3j chain3j, Credentials credentials, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) {
         return new RemoteCall(() -> {
             return deploy(type, chain3j, credentials, contractGasProvider, binary, encodedConstructor, value);
         });
     }
 
-    public static <T extends Contract> RemoteCall<T> deployRemoteCall(Class<T> type, Chain3j chain3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) {
+    public static <T extends SubChainContract> RemoteCall<T> deployRemoteCall(Class<T> type, Chain3j chain3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider, String binary, String encodedConstructor, BigInteger value) {
         return new RemoteCall(() -> {
             return deploy(type, chain3j, transactionManager, contractGasProvider, binary, encodedConstructor, value);
         });
