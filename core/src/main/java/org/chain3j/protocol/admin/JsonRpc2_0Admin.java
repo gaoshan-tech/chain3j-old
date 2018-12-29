@@ -27,7 +27,12 @@ public class JsonRpc2_0Admin extends JsonRpc2_0Chain3j implements Admin {
     
     public JsonRpc2_0Admin(Chain3jService chain3jService, long pollingInterval,
                            ScheduledExecutorService scheduledExecutorService) {
-        super(chain3jService, pollingInterval, scheduledExecutorService);
+        super(chain3jService, null, pollingInterval, scheduledExecutorService);
+    }
+
+    public JsonRpc2_0Admin(Chain3jService chain3jService, Chain3jService scsService, long pollingInterval,
+                           ScheduledExecutorService scheduledExecutorService) {
+        super(chain3jService, scsService, pollingInterval, scheduledExecutorService);
     }
 
     @Override

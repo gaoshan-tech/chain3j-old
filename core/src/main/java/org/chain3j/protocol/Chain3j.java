@@ -21,6 +21,10 @@ public interface Chain3j extends Moac, Chain3jRx {
         return new JsonRpc2_0Chain3j(chain3jService);
     }
 
+    static Chain3j build(Chain3jService chain3jService, Chain3jService scsService) {
+        return new JsonRpc2_0Chain3j(chain3jService, scsService);
+    }
+
     /**
      * Construct a new chain3j instance.
      *
@@ -34,7 +38,13 @@ public interface Chain3j extends Moac, Chain3jRx {
     static Chain3j build(
             Chain3jService chain3jService, long pollingInterval,
             ScheduledExecutorService scheduledExecutorService) {
-        return new JsonRpc2_0Chain3j(chain3jService, pollingInterval, scheduledExecutorService);
+        return new JsonRpc2_0Chain3j(chain3jService, null, pollingInterval, scheduledExecutorService);
+    }
+
+    static Chain3j build(
+            Chain3jService chain3jService, Chain3jService scsService, long pollingInterval,
+            ScheduledExecutorService scheduledExecutorService) {
+        return new JsonRpc2_0Chain3j(chain3jService, scsService, pollingInterval, scheduledExecutorService);
     }
 
     /**

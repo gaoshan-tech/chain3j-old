@@ -7,6 +7,6 @@ import java.math.BigInteger;
 
 public class ScsNonce extends Response<String> {
     public BigInteger getNonce() {
-        return Numeric.decodeQuantity(getResult());
+        return new BigInteger(getResult());
     }
 }

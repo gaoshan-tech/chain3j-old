@@ -31,18 +31,24 @@ public class JsonRpc2_0Chain3j implements Chain3j {
     public static final int DEFAULT_BLOCK_TIME = 15 * 1000;
 
     protected final Chain3jService chain3jService;
+    protected final Chain3jService scsService;
     private final JsonRpc2_0Rx chain3jRx;
     private final long blockTime;
     private final ScheduledExecutorService scheduledExecutorService;
 
     public JsonRpc2_0Chain3j(Chain3jService chain3jService) {
-        this(chain3jService, DEFAULT_BLOCK_TIME, Async.defaultExecutorService());
+        this(chain3jService, null, DEFAULT_BLOCK_TIME, Async.defaultExecutorService());
+    }
+
+    public JsonRpc2_0Chain3j(Chain3jService chain3jService, Chain3jService scsService) {
+        this(chain3jService, scsService, DEFAULT_BLOCK_TIME, Async.defaultExecutorService());
     }
 
     public JsonRpc2_0Chain3j(
-            Chain3jService chain3jService, long pollingInterval,
+            Chain3jService chain3jService, Chain3jService scsService, long pollingInterval,
             ScheduledExecutorService scheduledExecutorService) {
         this.chain3jService = chain3jService;
+        this.scsService = scsService;
         this.chain3jRx = new JsonRpc2_0Rx(this, scheduledExecutorService);
         this.blockTime = pollingInterval;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -650,7 +656,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
                 "scs_getBlock",
                 Arrays.asList(
                         defaultBlockParameter.getValue()),
-                chain3jService,
+                scsService,
                 McBlock.class);
     }
 
@@ -659,7 +665,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_directCall",
                 Arrays.asList(transaction),
-                chain3jService,
+                scsService,
                 McCall.class);
     }
 
@@ -671,7 +677,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
                         address,
                         startBlockParameter.getValue(),
                         endBlockParameter.getValue()),
-                chain3jService,
+                scsService,
                 ScsBlockList.class);
     }
 
@@ -680,7 +686,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getBlockNumber",
                 Arrays.asList(address),
-                chain3jService,
+                scsService,
                 McBlockNumber.class);
     }
 
@@ -689,7 +695,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getDappState",
                 Collections.<String>emptyList(),
-                chain3jService,
+                scsService,
                 ScsDappState.class);
     }
 
@@ -698,7 +704,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getMicroChainList",
                 Collections.<String>emptyList(),
-                chain3jService,
+                scsService,
                 ScsMicroChainList.class);
     }
 
@@ -707,7 +713,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getMicroChainInfo",
                 Collections.<String>emptyList(),
-                chain3jService,
+                scsService,
                 ScsMicroChainInfo.class);
     }
 
@@ -716,7 +722,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getNonce",
                 Arrays.asList(address, accountAddress),
-                chain3jService,
+                scsService,
                 ScsNonce.class);
     }
 
@@ -725,7 +731,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getSCSId",
                 Collections.<String>emptyList(),
-                chain3jService,
+                scsService,
                 ScsId.class);
     }
 
@@ -734,7 +740,7 @@ public class JsonRpc2_0Chain3j implements Chain3j {
         return new Request<>(
                 "scs_getTransactionReceipt",
                 Arrays.asList(address, transactionHash),
-                chain3jService,
+                scsService,
                 McGetTransactionReceipt.class);
     }
 
