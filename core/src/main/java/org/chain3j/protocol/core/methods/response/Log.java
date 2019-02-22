@@ -3,6 +3,7 @@ package org.chain3j.protocol.core.methods.response;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.chain3j.utils.Numeric;
 
 /**
@@ -20,6 +21,7 @@ public class Log {
     private String blockHash;
     private String blockNumber;
     private String address;
+    @JsonProperty("TxData")
     private String data;
     private String type;
     private List<String> topics;
